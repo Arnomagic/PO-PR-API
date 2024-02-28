@@ -1,0 +1,10 @@
+app:
+  port: 8080
+
+db:
+  user: "postgres"
+  password: "Arnon1010"
+  host: "localhost:5432"
+  db: "postgres?sslmode=disable"
+
+private_key: "copyrigthext"
