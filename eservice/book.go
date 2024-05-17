@@ -33,8 +33,8 @@ func (d bookEservice) AddBook(b BookInsert) (*Book, error) {
 	}
 	return &ebook, nil
 }
-func (d bookEservice) GetAllBook() ([]Book, error) {
-	res, err := d.db.SelectAllBook()
+func (d bookEservice) GetAllBook(sr map[string]string) ([]Book, int, error) {
+	res, to, err := d.db.SelectAllBook(sr)
 	if err != nil {
 		return nil, err
 	}

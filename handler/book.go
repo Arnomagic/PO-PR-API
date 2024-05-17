@@ -38,7 +38,7 @@ func (h bookHandler) AddBook(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 func (h bookHandler) GetAllBook(c *fiber.Ctx) error {
-	response, err := h.d.GetAllBook()
+	response, err := h.d.GetAllBook(c.Queries())
 	if err != nil {
 		return ErrorCheck(err)
 	}

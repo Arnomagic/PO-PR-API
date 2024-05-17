@@ -12,7 +12,7 @@ type Book struct {
 }
 type BookDb interface {
 	InsertBook(Book) (*Book, error)
-	SelectAllBook() ([]Book, error)
+	SelectAllBook(map[string]string) ([]Book, int, error)
 	SelectByIdBook(int) (*Book, error)
 	UpdateByIdBook(Book) (*Book, error)
 }

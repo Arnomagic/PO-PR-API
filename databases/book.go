@@ -3,7 +3,10 @@ package databases
 import (
 	"database/sql"
 	"fmt"
+	"hexapi/logs"
+	"strconv"
 
+	"github.com/gofiber/fiber"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -20,18 +23,57 @@ func (d bookDb) InsertBook(b Book) (*Book, error) {
 	}
 	return &book, nil
 }
-func (d bookDb) SelectAllBook() ([]Book, error) {
-	query := "SELECT * FROM libraly_system.books ;"
+func (d bookDb) SelectAllBook(sr map[string]string) ([]Book, int, error) {
+	query := "SELECT * FROM libraly_system.books "
+	arg := []any{}
+	if sr["srch"] != "" {
+		query += "WHERE title LIKE '%' || $1 || '%' OR Author LIKE '%' || $1 || '%' "
+		arg = append(arg, sr["srch"])
+	}
+	if sr["srt"] != "" {
+		if sr["srt_fld"] != "" {
+			if sr["srt_fld"] == "1" {
+				query += "ORDER BY  " + "sub_name " + " " + sr["srt"]
+			}
+			if sr["srt_fld"] == "2" {
+				query += "ORDER BY  " + "address " + " " + sr["srt"]
+			}
+			if sr["srt_fld"] == "3" {
+				query += "ORDER BY  " + "contact " + " " + sr["srt"]
+			}
+			if sr["srt_fld"] == "4" {
+				query += "ORDER BY  " + "tax_id " + " " + sr["srt"]
+			}
+		} else {
+			query += "ORDER BY id " + sr["srt"]
+		}
+	}
+	if sr["page"] != "" && sr["limit"] != "" {
+		page, err := strconv.Atoi(sr["page"])
+		if err != nil {
+			logs.Log.Error(err.Error())
+			return nil, 0, fiber.ErrBadRequest
+		}
+		limit, err := strconv.Atoi(sr["limit"])
+		if err != nil {
+			logs.Log.Error(err.Error())
+			return nil, 0, fiber.ErrBadRequest
+		}
+		offset := (page - 1) * limit
+		query += " OFFSET $" + strconv.Itoa(len(arg)+1) + " LIMIT $" + strconv.Itoa(len(arg)+2)
+		arg = append(arg, offset, limit)
+	}
+
 	book := []Book{}
-	err := d.db.Select(&book, query)
+	err := d.db.Select(&book, query, arg...)
 	if err != nil {
 		fmt.Println(err)
-		return nil, ErrDB
+		return nil, 0, ErrDB
 	}
 	if len(book) == 0 {
-		return nil, ErrNoRows
+		return nil, 0, ErrNoRows
 	}
-	return book, nil
+	return book, 0, nil
 }
 func (d bookDb) SelectByIdBook(id int) (*Book, error) {
 	query := "SELECT * FROM libraly_system.books WHERE books_id = $1;"

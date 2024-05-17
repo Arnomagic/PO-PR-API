@@ -17,7 +17,7 @@ type BookInsert struct {
 }
 type BookEservice interface {
 	AddBook(BookInsert) (*Book, error)
-	GetAllBook() ([]Book, error)
+	GetAllBook(map[string]string) ([]Book, int, error)
 	GetByIdBook(int) (*Book, error)
 	EditBookById(Book) (*Book, error)
 }
